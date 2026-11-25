@@ -113,7 +113,7 @@ export function render(container, { view, actions, myUserId, onAction }) {
     const reason = {
       five: '连成五子',
       resign: '认输',
-      draw_white_win: '棋盘填满 · 平局',
+      draw_white_win: '棋盘填满 · 白棋胜',
       draw_both_lose: '棋盘填满 · 双方均败',
     }[view.result.reason] || view.result.reason;
     let winnerText;
