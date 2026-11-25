@@ -9,10 +9,14 @@ This repository is one engine exposing two catalog IDs:
 - `gomoku-seki`: 15×15, no forbidden moves, comet setup with black H8, white J7,
   black F10, then white moves first; a full-board draw is a loss for both players.
 
-This is the first pair of four planned Gomoku entries. Forbidden-move variants
-can be added to the same engine later.
+The same engine also exposes:
 
-No next-move hint UI is provided.
+- `gomoku-forbidden`: 15×15, specified opening, black forbidden points
+  (overline/double-four/double-three); a black-only hint toggle marks them.
+- `gomoku-rif`: 15×15, specified opening, forbidden points, three-move swap and
+  five-move two choices.
+
+The free and seki modes have no hint UI. Coordinates skip I (A-H, J-P).
 
 ## Layout
 
