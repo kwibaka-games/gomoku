@@ -1,12 +1,22 @@
 /**
- * Gomoku browser module. No hint markers or hint toggle: this variant has no
- * next-move hint feature.
+ * Gomoku browser module.
+ *
+ * Stones are placed on line intersections. This variant deliberately has no
+ * next-move hint feature, so no legal-point markers are rendered.
  */
+
+const SVG_NS = 'http://www.w3.org/2000/svg';
 
 function el(tag, cls, text) {
   const node = document.createElement(tag);
   if (cls) node.className = cls;
   if (text !== undefined) node.textContent = text;
+  return node;
+}
+
+function svg(tag, attrs = {}) {
+  const node = document.createElementNS(SVG_NS, tag);
+  for (const [key, value] of Object.entries(attrs)) node.setAttribute(key, String(value));
   return node;
 }
 
@@ -16,6 +26,10 @@ function colorName(color) {
 
 function playerName(view, userId) {
   return view.players.find((player) => player.userId === userId)?.name || userId;
+}
+
+function coordinate(size, index) {
+  return `${String.fromCharCode(65 + (index % size))}${Math.floor(index / size) + 1}`;
 }
 
 export function render(container, { view, actions, myUserId, onAction }) {
@@ -65,45 +79,88 @@ export function render(container, { view, actions, myUserId, onAction }) {
   }
   root.appendChild(tools);
 
-  const board = el('div', `gomoku-board size-${view.size}`);
-  board.setAttribute('role', 'grid');
-  const stars = view.size === 15
-    ? new Set([3 * 15 + 3, 11 * 15 + 3, 3 * 15 + 11, 11 * 15 + 11, 7 * 15 + 7])
-    : new Set();
-  // Board array index 0 is row 1 (bottom of a standard Gomoku diagram).
-  // Render rows from top (size-1) to bottom so H8/I9 look like the reference.
-  for (let row = view.size - 1; row >= 0; row -= 1) {
-    for (let col = 0; col < view.size; col += 1) {
-      const index = row * view.size + col;
-      const value = view.board?.[index] ?? null;
-      const placeAction = places.get(index);
-      const cell = el(
-        'button',
-        `gomoku-cell${value ? ` ${value}` : ''}${winning.has(index) ? ' winning' : ''}${view.lastMove?.index === index ? ' last' : ''}`,
-      );
-      cell.type = 'button';
-      cell.setAttribute('role', 'gridcell');
-      if (!value && stars.has(index)) cell.classList.add('star');
-      if (value) cell.appendChild(el('span', `gomoku-stone ${value}`));
-      if (view.lastMove?.index === index) cell.appendChild(el('span', 'gomoku-last-mark'));
-      cell.disabled = !placeAction || !myTurn;
-      if (placeAction) {
-        cell.title = `${String.fromCharCode(65 + (index % view.size))}${Math.floor(index / view.size) + 1}`;
-        cell.addEventListener('click', () => onAction(placeAction));
-      }
-      board.appendChild(cell);
+  const size = view.size;
+  const pad = 0.65;
+  const board = svg('svg', {
+    class: `gomoku-board size-${size}`,
+    viewBox: `${-pad} ${-pad} ${size - 1 + pad * 2} ${size - 1 + pad * 2}`,
+    role: 'grid',
+    'aria-label': `${size}×${size} 五子棋棋盘`,
+  });
+  board.appendChild(svg('rect', {
+    class: 'gomoku-bg',
+    x: -0.5,
+    y: -0.5,
+    width: size,
+    height: size,
+    rx: 0.06,
+  }));
+  for (let line = 0; line < size; line += 1) {
+    board.appendChild(svg('line', {
+      class: 'gomoku-grid',
+      x1: 0,
+      y1: line,
+      x2: size - 1,
+      y2: line,
+    }));
+    board.appendChild(svg('line', {
+      class: 'gomoku-grid',
+      x1: line,
+      y1: 0,
+      x2: line,
+      y2: size - 1,
+    }));
+  }
+  if (size === 15) {
+    for (const [x, y] of [[3, 3], [11, 3], [3, 11], [11, 11], [7, 7]]) {
+      board.appendChild(svg('circle', { class: 'gomoku-star', cx: x, cy: y, r: 0.075 }));
     }
+  }
+
+  for (let index = 0; index < size * size; index += 1) {
+    const row = Math.floor(index / size);
+    const col = index % size;
+    const x = col;
+    const y = size - 1 - row;
+    const value = view.board?.[index] ?? null;
+    const placeAction = places.get(index);
+    const group = svg('g', {
+      class: `gomoku-cell${value ? ` ${value}` : ''}${winning.has(index) ? ' winning' : ''}${view.lastMove?.index === index ? ' last' : ''}${placeAction && myTurn ? ' playable' : ''}`,
+      role: 'gridcell',
+      'aria-label': `${coordinate(size, index)}${value ? ` ${colorName(value)}` : ''}`,
+    });
+    const hit = svg('circle', { class: 'gomoku-hit', cx: x, cy: y, r: 0.46 });
+    group.appendChild(hit);
+    if (value) {
+      group.appendChild(svg('circle', { class: `gomoku-stone ${value}`, cx: x, cy: y, r: 0.4 }));
+    }
+    if (winning.has(index)) {
+      group.appendChild(svg('circle', { class: 'gomoku-win-ring', cx: x, cy: y, r: 0.45 }));
+    }
+    if (view.lastMove?.index === index) {
+      group.appendChild(svg('circle', { class: 'gomoku-last-mark', cx: x, cy: y, r: 0.11 }));
+    }
+    if (placeAction && myTurn) {
+      group.setAttribute('tabindex', '0');
+      group.addEventListener('click', () => onAction(placeAction));
+      group.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          onAction(placeAction);
+        }
+      });
+      const title = svg('title');
+      title.textContent = coordinate(size, index);
+      group.appendChild(title);
+    }
+    board.appendChild(group);
   }
   root.appendChild(board);
 
   const info = el('div', 'gomoku-info');
   for (const player of view.players) {
     info.appendChild(
-      el(
-        'span',
-        `gomoku-player ${player.color}`,
-        `${player.name} · ${colorName(player.color)}`,
-      ),
+      el('span', `gomoku-player ${player.color}`, `${player.name} · ${colorName(player.color)}`),
     );
   }
   root.appendChild(info);
