@@ -19,7 +19,7 @@ export const GOMOKU_GAME: GameMetadata = {
 export const GOMOKU_SEKI_GAME: GameMetadata = {
   ...common,
   id: 'gomoku-seki',
-  name: '五子棋（无禁手·彗星座子）',
+  name: '五子棋（无禁手，座子）',
   version: '0.1.0',
   description: '15×15 自由五子棋，黑 H8 / 白 I9 座子，白先；平局双方均败。',
 };
