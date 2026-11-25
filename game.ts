@@ -497,6 +497,8 @@ export class GomokuMatch {
       }
     }
 
+    const previousBoard = [...match.board];
+    const previousLastMove = match.lastMove;
     match.board[index] = color;
     match.lastMove = { index, color };
     match.seq += 1;
@@ -504,6 +506,9 @@ export class GomokuMatch {
     const win = findWin(match.board, match.size, color, index);
     if (win) {
       if (color === 'black' && win.length > 5) {
+        match.board = previousBoard;
+        match.lastMove = previousLastMove;
+        match.seq -= 1;
         this.error(match.id, playerId, 'E_FORBIDDEN', '黑棋长连禁手');
         return;
       }
