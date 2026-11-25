@@ -70,24 +70,29 @@ export function render(container, { view, actions, myUserId, onAction }) {
   const stars = view.size === 15
     ? new Set([3 * 15 + 3, 11 * 15 + 3, 3 * 15 + 11, 11 * 15 + 11, 7 * 15 + 7])
     : new Set();
-  for (let index = 0; index < view.size * view.size; index += 1) {
-    const value = view.board?.[index] ?? null;
-    const placeAction = places.get(index);
-    const cell = el(
-      'button',
-      `gomoku-cell${value ? ` ${value}` : ''}${winning.has(index) ? ' winning' : ''}${view.lastMove?.index === index ? ' last' : ''}`,
-    );
-    cell.type = 'button';
-    cell.setAttribute('role', 'gridcell');
-    if (!value && stars.has(index)) cell.classList.add('star');
-    if (value) cell.appendChild(el('span', `gomoku-stone ${value}`));
-    if (view.lastMove?.index === index) cell.appendChild(el('span', 'gomoku-last-mark'));
-    cell.disabled = !placeAction || !myTurn;
-    if (placeAction) {
-      cell.title = `${String.fromCharCode(65 + (index % view.size))}${Math.floor(index / view.size) + 1}`;
-      cell.addEventListener('click', () => onAction(placeAction));
+  // Board array index 0 is row 1 (bottom of a standard Gomoku diagram).
+  // Render rows from top (size-1) to bottom so H8/I9 look like the reference.
+  for (let row = view.size - 1; row >= 0; row -= 1) {
+    for (let col = 0; col < view.size; col += 1) {
+      const index = row * view.size + col;
+      const value = view.board?.[index] ?? null;
+      const placeAction = places.get(index);
+      const cell = el(
+        'button',
+        `gomoku-cell${value ? ` ${value}` : ''}${winning.has(index) ? ' winning' : ''}${view.lastMove?.index === index ? ' last' : ''}`,
+      );
+      cell.type = 'button';
+      cell.setAttribute('role', 'gridcell');
+      if (!value && stars.has(index)) cell.classList.add('star');
+      if (value) cell.appendChild(el('span', `gomoku-stone ${value}`));
+      if (view.lastMove?.index === index) cell.appendChild(el('span', 'gomoku-last-mark'));
+      cell.disabled = !placeAction || !myTurn;
+      if (placeAction) {
+        cell.title = `${String.fromCharCode(65 + (index % view.size))}${Math.floor(index / view.size) + 1}`;
+        cell.addEventListener('click', () => onAction(placeAction));
+      }
+      board.appendChild(cell);
     }
-    board.appendChild(cell);
   }
   root.appendChild(board);
 
