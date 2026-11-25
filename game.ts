@@ -44,10 +44,11 @@ export function initialBoard(mode: GomokuMode): GomokuCell[] {
   const size = boardSize(mode);
   const board: GomokuCell[] = Array<GomokuCell>(size * size).fill(null);
   if (mode === 'seki') {
-    // 彗星座子：图中黑 1 在 H8，白 2 在 I9。H/I are 0-based 7/8, rows 8/9
-    // are 0-based 7/8. White moves first after the setup.
-    board[7 * size + 7] = 'black';
-    board[8 * size + 8] = 'white';
+    // 彗星座子（简化座子）：前三手固定为黑 H8、白 J7、黑 F10。
+    // Coordinates are 0-based: H=7,J=9,F=5; rows 8=7,7=6,10=9.
+    board[7 * size + 7] = 'black'; // H8
+    board[6 * size + 9] = 'white'; // J7
+    board[9 * size + 5] = 'black'; // F10
   }
   return board;
 }
