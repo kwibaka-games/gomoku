@@ -1,14 +1,28 @@
 import { WebSocket } from 'ws';
 import { GomokuMatch } from './game.js';
-import { GOMOKU_GAME, GOMOKU_SEKI_GAME } from './metadata.js';
+import { GOMOKU_FORBIDDEN_GAME, GOMOKU_GAME, GOMOKU_RIF_GAME, GOMOKU_SEKI_GAME } from './metadata.js';
 import type { GameToPlatform, PlatformToGame } from '../../protocol/protocol.js';
 
 const matchId = process.env.MATCH_ID;
 const platformUrl = process.env.PLATFORM_WS_URL;
 const secret = process.env.GAME_SECRET;
-const gameId = process.env.GAME_ID === 'gomoku-seki' ? 'gomoku-seki' : 'gomoku';
-const metadata = gameId === 'gomoku-seki' ? GOMOKU_SEKI_GAME : GOMOKU_GAME;
-const mode = gameId === 'gomoku-seki' ? 'seki' : 'free';
+const gameId = process.env.GAME_ID || 'gomoku';
+const metadata =
+  gameId === 'gomoku-seki'
+    ? GOMOKU_SEKI_GAME
+    : gameId === 'gomoku-forbidden'
+      ? GOMOKU_FORBIDDEN_GAME
+      : gameId === 'gomoku-rif'
+        ? GOMOKU_RIF_GAME
+        : GOMOKU_GAME;
+const mode =
+  gameId === 'gomoku-seki'
+    ? 'seki'
+    : gameId === 'gomoku-forbidden'
+      ? 'forbidden'
+      : gameId === 'gomoku-rif'
+        ? 'rif'
+        : 'free';
 
 if (!matchId || !platformUrl || !secret) {
   console.error('[gomoku-worker] MATCH_ID, PLATFORM_WS_URL and GAME_SECRET are required');
