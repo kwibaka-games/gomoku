@@ -6,8 +6,8 @@ This repository is one engine exposing two catalog IDs:
 
 - `gomoku`: 11×11, no forbidden moves, black first; a full-board draw is a
   white win.
-- `gomoku-seki`: 15×15, no forbidden moves, comet setup with black H8 and
-  white I9, white moves first; a full-board draw is a loss for both players.
+- `gomoku-seki`: 15×15, no forbidden moves, comet setup with black H8, white J7,
+  black F10, then white moves first; a full-board draw is a loss for both players.
 
 This is the first pair of four planned Gomoku entries. Forbidden-move variants
 can be added to the same engine later.
