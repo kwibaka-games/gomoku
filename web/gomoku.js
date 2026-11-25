@@ -67,6 +67,9 @@ export function render(container, { view, actions, myUserId, onAction }) {
 
   const board = el('div', `gomoku-board size-${view.size}`);
   board.setAttribute('role', 'grid');
+  const stars = view.size === 15
+    ? new Set([3 * 15 + 3, 11 * 15 + 3, 3 * 15 + 11, 11 * 15 + 11, 7 * 15 + 7])
+    : new Set();
   for (let index = 0; index < view.size * view.size; index += 1) {
     const value = view.board?.[index] ?? null;
     const placeAction = places.get(index);
@@ -76,6 +79,7 @@ export function render(container, { view, actions, myUserId, onAction }) {
     );
     cell.type = 'button';
     cell.setAttribute('role', 'gridcell');
+    if (!value && stars.has(index)) cell.classList.add('star');
     if (value) cell.appendChild(el('span', `gomoku-stone ${value}`));
     if (view.lastMove?.index === index) cell.appendChild(el('span', 'gomoku-last-mark'));
     cell.disabled = !placeAction || !myTurn;
