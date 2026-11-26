@@ -1,8 +1,8 @@
-# kwibaka-game-gomoku
+# gomoku
 
-五子棋 variants for [kwibaka-boardgame-platform](https://github.com/ZangXuanyi/kwibaka-boardgame-platform).
+五子棋 variants for [kwibaka-boardgame-platform](https://github.com/kwibaka-games/boardgame-platform).
 
-This repository is one engine exposing two catalog IDs:
+This repository is one engine exposing four catalog IDs:
 
 - `gomoku`: 11×11, no forbidden moves, black first; a full-board draw is a
   white win.
